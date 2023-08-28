@@ -78,19 +78,19 @@ TTree *tree0, *tree1, *tree2, *tree3, *tree4, *tree;
 
 void open(){
 
-  newfile0 = TFile::Open("histograms/data.root");//data.root");
+  newfile0 = TFile::Open("../eef1/histograms/data.root");//data.root");
   tree0 = (TTree*)newfile0->Get("Tree");
 
-  newfile1 = TFile::Open("histograms/mc_m0.root");
+  newfile1 = TFile::Open("../eef1/histograms/mc_m0.root");
   tree1 = (TTree*)newfile1->Get("Treegen");
 
-  newfile2 = TFile::Open("histograms/mc_m1.root");
+  newfile2 = TFile::Open("../eef1/histograms/mc_m1.root");
   tree2 = (TTree*)newfile2->Get("Treegen");
 
-  newfile3 = TFile::Open("histograms/mc_f0_eta_m0.root");
+  newfile3 = TFile::Open("../eef1/histograms/mc_f0_eta_m0.root");
   tree3 = (TTree*)newfile3->Get("Tree");
 
-  newfile4 = TFile::Open("histograms/mc_f0_eta_m1.root");
+  newfile4 = TFile::Open("../eef1/histograms/mc_f0_eta_m1.root");
   tree4 = (TTree*)newfile4->Get("Tree");
 
 
@@ -230,7 +230,7 @@ double fit2g1(string filee, string filemc, double qmin, double qmax){
   cout << "===============================================" << endl;
   cout << "                     end                       " << endl;
   cout << "===============================================" << endl;
-  s->SaveAs(Form("figs/%g_%g.png",qmin,qmax));
+  s->SaveAs(Form("../eef1/figs/%g_%g.png",qmin,qmax));
   return 1.;
 
 }
@@ -242,13 +242,13 @@ void fitall(){
   double en0[] = {2,4,5,6,7,10,20.};
   double en[20],den[20];
   double cr[20],dcr[20];
-  ofstream stream("results/nevents.dat");
+  ofstream stream("../eef1/results/nevents.dat");
   
   for(int i = 0; i < nrun; i++){
     en[i] = (en0[i]+en0[i+1])/2.;
     den[i] = (en0[i+1] - en0[i])/2.;
     stream << en0[i] << " " << en0[i+1] << " "; 
-    fit2g1("histograms/data.root","histograms/mc_m0.root",en0[i],en0[i+1]);
+    fit2g1("../eef1/histograms/data.root","../eef1/histograms/mc_m0.root",en0[i],en0[i+1]);
     stream << paramm[0] << " " << paramm[1] << endl;
     cr[i] = paramm[4];
     dcr[i] = paramm[5];
@@ -609,28 +609,3 @@ void draw_ff(){
 }
 
 
-
-double diff_cr_sec(double *Q2, double *par){
-
-  double wide = 0.05;
-  double pos = Q2[0];
-  if(Q2[0] < 2)wide = 0.0001;
-  if(Q2[0] >= 2 && Q2[0] < 2.05){wide = Q2[0] - 2;pos = 2+wide/2.;}
-  if(Q2[0] < 2)return 0.;
-  if(par[0] == 0) return (double)tree1->GetEntries(Form("Q2gen > %g && Q2gen < %g",pos-wide/2.,pos+wide/2.))/tree1->GetEntries()*cross_total_m0/wide;
-  if(par[0] == 1) return (double)tree2->GetEntries(Form("Q2gen > %g && Q2gen < %g",pos-wide/2.,pos+wide/2.))/tree2->GetEntries()*cross_total_m1/wide;
-  /*
-
-  TF1 *u1 = new TF1("u1",diff_cr_sec,1,25,1);
-  u1->SetNpx(500);
-  u1->SetParameter(0,1);
-  u1->SetTitle("m=1");
-  u1->SetLineColor(1);
-  u1->Draw();
-  TF1 *u = new TF1("u",diff_cr_sec,1,25,1);
-  u->SetNpx(500);
-  u->SetTitle("m=0");
-  u->SetParameter(0,0);
-  u->Draw("same");
-  */
-}

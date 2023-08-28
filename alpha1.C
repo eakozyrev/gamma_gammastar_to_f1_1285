@@ -45,23 +45,23 @@ double dcr2[6];
 
 void open(){
 
-  newfile0 = TFile::Open("histograms/data.root");//data.root");
+  newfile0 = TFile::Open("../eef1/histograms/data.root");//data.root");
   tree0 = (TTree*)newfile0->Get("Tree");
 
-  newfile1 = TFile::Open("histograms/mc_m0.root");
+  newfile1 = TFile::Open("../eef1/histograms/mc_m0.root");
   tree1 = (TTree*)newfile1->Get("Tree");
 
-  newfile2 = TFile::Open("histograms/mc_m1.root");
+  newfile2 = TFile::Open("../eef1/histograms/mc_m1.root");
   tree2 = (TTree*)newfile2->Get("Tree");
 
-  newfile3 = TFile::Open("histograms/mc_f0_eta_m0.root");
+  newfile3 = TFile::Open("../eef1/histograms/mc_f0_eta_m0.root");
   tree3 = (TTree*)newfile3->Get("Tree");
 
-  newfile4 = TFile::Open("histograms/mc_f0_eta_m1.root");
+  newfile4 = TFile::Open("../eef1/histograms/mc_f0_eta_m1.root");
   tree4 = (TTree*)newfile4->Get("Tree");
 
-  tree_m0_gen = (TTree*)(TFile::Open("histograms/mc_m0.root"))->Get("Treegen");
-  tree_m1_gen = (TTree*)(TFile::Open("histograms/mc_m1.root"))->Get("Treegen");
+  tree_m0_gen = (TTree*)(TFile::Open("../eef1/histograms/mc_m0.root"))->Get("Treegen");
+  tree_m1_gen = (TTree*)(TFile::Open("../eef1/histograms/mc_m1.root"))->Get("Treegen");
 
 }
 
@@ -181,7 +181,7 @@ void draw_bkg(){
 
 double chi2(double *par, double *par1){
 
-  double result = 0;
+  double res = 0;
   int nma0 = 6;
   double ma0_start = 0.65;
   double wide_ma0 = (1.15-ma0_start)/nma0;
@@ -227,11 +227,11 @@ double chi2(double *par, double *par1){
       nmc = nmc + bkg/2.;
       Bkg+=bkg;
       //cout << "bkg = " << bkg << "            Bkg = " << Bkg <<  "   par[0] = " << par[0] << "    nmc = " << nmc << endl;
-      result = result - 2.*log(TMath::Poisson(nmc,btv));
+      res = res - 2.*log(TMath::Poisson(nmc,btv));
     }
   }
 
-  return result;
+  return res;
     
 }
 
@@ -679,14 +679,14 @@ void script_draw_cos(){
 
 
 void cross_section(){
-  ifstream stream("results/nevents.dat");
-  ifstream stream_ratio("results/m0_froaction/m0_fraction_0.dat");
-  ifstream stream_rad("results/rad.dat");
-  ofstream streamof("results/cross.dat");
+  ifstream stream("../eef1/results/nevents.dat");
+  ifstream stream_ratio("../eef1/results/m0_froaction/m0_fraction_0.dat");
+  ifstream stream_rad("../eef1/results/rad.dat");
+  ofstream streamof("../eef1/results/cross.dat");
   double crossmc_m0, crossmc_m1;
 
-  ofstream stream_table_cr0("results/table_cr0.dat");
-  ofstream stream_table_cr1("results/table_cr1.dat");
+  ofstream stream_table_cr0("../eef1/results/table_cr0.dat");
+  ofstream stream_table_cr1("../eef1/results/table_cr1.dat");
   
   double  effic_Q2(double, double, int, bool);
   double factorm0 = 0.54;double dfactorm0;
@@ -704,12 +704,12 @@ void cross_section(){
     double dNm0 = sqrt(pow(factorm0*dNev,2.) + pow(dfactorm0*Nev,2.));
     double Nm1 = (1.-factorm0)*Nev;
     double dNm1 = sqrt(pow((1.-factorm0)*dNev,2.) + pow(dfactorm0*Nev,2.));
-    TFile *newfilem0 = TFile::Open("histograms/mc_m0.root");
+    TFile *newfilem0 = TFile::Open("../eef1/histograms/mc_m0.root");
     TTree* treem0 = (TTree*)newfilem0->Get("Tree");
     TTree* treem0gen = (TTree*)newfilem0->Get("Treegen");
     double partm0 = treem0gen->GetEntries(Form("Q2gen > %g && Q2gen < %g",ena,enb))/(double)treem0gen->GetEntries();
     double dpartm0 = sqrt(partm0*(1. - partm0)/(double)treem0gen->GetEntries());
-    TFile *newfilem1 = TFile::Open("histograms/mc_m1.root");
+    TFile *newfilem1 = TFile::Open("../eef1/histograms/mc_m1.root");
     TTree* treem1 = (TTree*)newfilem1->Get("Tree");
     TTree* treem1gen = (TTree*)newfilem1->Get("Treegen");
     double partm1 = treem1gen->GetEntries(Form("Q2gen > %g & Q2gen < %g",ena,enb))/(double)treem1gen->GetEntries();
@@ -718,17 +718,21 @@ void cross_section(){
     double dcross_mc_m0 = dpartm0/partm0*cross_mc_m0;
     double cross_mc_m1 = partm1*cross_total_m1*1000.;
     double dcross_mc_m1 = dpartm1/partm1*cross_mc_m1;
-    
+    cout << "Here1" << endl;
     double eff_m0 = effic_Q2(ena,enb,0,false);
+    cout << "Here2" << endl;
     double deff_m0 = sqrt(eff_m0*(1. - eff_m0)/(double)treem0gen->GetEntries(Form("Q2gen > %g && Q2gen < %g",ena,enb)));
+    cout << "Here3" << endl;
     double eff_m1 = effic_Q2(ena,enb,1,false);
+    cout << "Here4" << endl;
     double deff_m1 = sqrt(eff_m1*(1.-eff_m1)/(double)treem1gen->GetEntries(Form("Q2gen > %g && Q2gen < %g",ena,enb)));
-
+cout << "Here5" << endl;
     double eff_m0_true = effic_Q2(ena,enb,0,true);
     double eff_m1_true = effic_Q2(ena,enb,1,true);
+    cout << "Here6" << endl;
     double deff_m0_true = sqrt(eff_m0_true*(1. - eff_m0_true)/(double)treem0gen->GetEntries(Form("Q2gen > %g && Q2gen < %g",ena,enb)));
     double deff_m1_true = sqrt(eff_m1_true*(1. - eff_m1_true)/(double)treem1gen->GetEntries(Form("Q2gen > %g && Q2gen < %g",ena,enb)));
-    
+    cout << "Here7" << endl;
     double cross_m0 = Nm0/eff_m0_true/469./0.348/rad;
     double dcross_m0 = dNm0/Nm0*cross_m0;
     cout << Nm0 << " " << dNm0  << " " << factorm0 << " " << Nev << " eff_m0 = " << eff_m0 <<   endl;
@@ -760,18 +764,17 @@ void draw_cross_sect_diff(int mode = 0){
   double en[100000],den[100000],cr0[100000],dcr0[100000],cr1[100000],dcr1[100000];
    int nrun = 0;
    double total[1000],dtotal[1000];
-   ifstream stream("results/cross.dat");
+   ifstream stream("../eef1/results/cross.dat");
    double llll;
    double enO[1],denO[1],totalO[1],dtotalO[1];
    while(stream.eof()==0){
      stream >> en[nrun] >> den[nrun] >> cr0[nrun] >> dcr0[nrun] >> cr1[nrun] >> dcr1[nrun] >> llll >> llll >> llll >> llll;
-     cr0[nrun] = cr0[nrun]/1000./2./den[nrun];
-     dcr0[nrun] = dcr0[nrun]/1000./2./den[nrun];
-     cr1[nrun] = cr1[nrun]/1000./2./den[nrun];
-     dcr1[nrun] = dcr1[nrun]/1000./2./den[nrun];
-     double btv = (den[nrun] - en[nrun])/2.;
+     cr0[nrun] = cr0[nrun]/1000./(den[nrun]-en[nrun]);
+     dcr0[nrun] = dcr0[nrun]/1000./(den[nrun]-en[nrun]);
+     cr1[nrun] = cr1[nrun]/1000./(den[nrun]-en[nrun]);
+     dcr1[nrun] = dcr1[nrun]/1000./(den[nrun]-en[nrun]);
      en[nrun] = en[nrun]/2. + den[nrun]/2.;
-     den[nrun] = btv;
+     den[nrun] = (den[nrun] - en[nrun])/2.;
      total[nrun] = cr0[nrun] + cr1[nrun];
      dtotal[nrun] = sqrt(pow(dcr0[nrun],2.) + pow(dcr1[nrun],2.));
      if(stream.eof()==1)break;
@@ -868,7 +871,7 @@ void draw_cross_sect(int mode = 0){
   double en[100000],den[100000],cr0[100000],dcr0[100000],cr1[100000],dcr1[100000];
    int nrun = 0;
    double total[1000],dtotal[1000];
-   ifstream stream("results/cross.dat");
+   ifstream stream("../eef1/results/cross.dat");
    double llll;
    double enO[1],denO[1],totalO[1],dtotalO[1];
    while(stream.eof()==0){
@@ -1138,7 +1141,7 @@ double cross_section_dQ2_TL(double *Q2, double *par){
   double hc = 3.88*pow(10.,8.); // pb/GeV^2  197 MeV*fm
 
   double G = 3.5/1000/1000;
-  double M = 1.281;
+  double M = 1.285;
   cout << " Hello1 " << endl;
   double Qmax_me = 100/511./511.*pow(10.,12);
   cout << " Hello1 " << endl;
@@ -1162,10 +1165,12 @@ double  effic_Q2(double left, double right, int m, bool FF){
     tree_effic = tree1;
     tree_effic_gen = tree_m0_gen;
   }
-  if(m==1){
+  else if(m==1){
     tree_effic = tree2;
     tree_effic_gen = tree_m1_gen;
   }
+  else {std::cerr << "File not found" << std::endl; return 0.;}
+  
   double res = 0;
   double res0 = 0;
   int Nsteps=10;
@@ -1179,7 +1184,6 @@ double  effic_Q2(double left, double right, int m, bool FF){
     res += factor*Neff;
     res0 += factor*(double)tree_effic_gen->GetEntries(Form("Q2gen > %g && Q2gen < %g",q2-step/2.,q2+step/2.));
   }
-
   return res/res0;
   
 }
@@ -1191,7 +1195,7 @@ void draw_ff(){
   double en[100000],den[100000],cr0[100000],dcr0[100000],cr1[100000],dcr1[100000];
    int nrun = 0;
    double total[1000],dtotal[1000];
-   ifstream stream("results/cross.dat");
+   ifstream stream("../eef1/results/cross.dat");
    double llll;
    while(stream.eof()==0){
      stream >> en[nrun] >> den[nrun] >> llll >> llll >> llll >> llll >> cr0[nrun] >> dcr0[nrun] >> cr1[nrun] >> dcr1[nrun];

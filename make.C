@@ -5,15 +5,15 @@
 int main(){
  
     TChain *chain= new TChain("h1");
-    chain->Add("trees/run1.root");
-    chain->Add("trees/run2.root");
-    chain->Add("trees/run3.root");
-    chain->Add("trees/run4.root");
-    chain->Add("trees/run5.root");    
-    chain->Add("trees/run6.root"); 
+    chain->Add("../eef1/trees/run1.root");
+    chain->Add("../eef1/trees/run2.root");
+    chain->Add("../eef1/trees/run3.root");
+    chain->Add("../eef1/trees/run4.root");
+    chain->Add("../eef1/trees/run5.root");    
+    chain->Add("../eef1/trees/run6.root"); 
     yield as(chain);
-    cout << "trees/data.root is opened "  << endl;
-    as.Loop("histograms/data.root");
+    cout << "../eef1/trees/data.root is opened "  << endl;
+    as.Loop("../eef1/histograms/data.root");
     
     return 1;
 }
@@ -22,10 +22,10 @@ int main(){
 int main_mc_m0(){
  
     TChain *chain= new TChain("h1");
-    chain->Add("trees/m0_new2/mc.root");
+    chain->Add("../eef1/trees/m0_new2/mc.root");
     yield as(chain);
-    cout << "trees/m0_new2/mc.root is opened "  << endl;
-    as.Loop("histograms/mc_m0.root");
+    cout << "../eef1/trees/m0_new2/mc.root is opened "  << endl;
+    as.Loop("../eef1/histograms/mc_m0.root");
     
     return 1;
 }
@@ -33,10 +33,10 @@ int main_mc_m0(){
 int main_mc_m1(){
  
     TChain *chain= new TChain("h1");
-    chain->Add("trees/m1_new2/mc.root");
+    chain->Add("../eef1/trees/m1_new2/mc.root");
     yield as(chain);
-    cout << "trees/m1_new2/mc.root is opened "  << endl;
-    as.Loop("histograms/mc_m1.root");
+    cout << "../eef1/trees/m1_new2/mc.root is opened "  << endl;
+    as.Loop("../eef1/histograms/mc_m1.root");
     
     return 1;
 }
@@ -44,20 +44,20 @@ int main_mc_m1(){
 int main_mc_f0_eta_m0(){
  
     TChain *chain= new TChain("h1");
-    chain->Add("trees/f0_eta_m0/mc.root");
+    chain->Add("../eef1/trees/f0_eta_m0/mc.root");
     yield as(chain);
-    cout << "trees/f0_eta_m0/mc.root is opened "  << endl;
-    as.Loop("histograms/mc_f0_eta_m0.root");
+    cout << "../eef1/trees/f0_eta_m0/mc.root is opened "  << endl;
+    as.Loop("../eef1/histograms/mc_f0_eta_m0.root");
     return 1;
 }
 
 int main_mc_f0_eta_m1(){
  
     TChain *chain= new TChain("h1");
-    chain->Add("trees/f0_eta_m1/mc.root");
+    chain->Add("../eef1/trees/f0_eta_m1/mc.root");
     yield as(chain);
-    cout << "trees/f0_eta_m1/mc.root is opened "  << endl;
-    as.Loop("histograms/mc_f0_eta_m1.root");
+    cout << "../eef1/trees/f0_eta_m1/mc.root is opened "  << endl;
+    as.Loop("../eef1/histograms/mc_f0_eta_m1.root");
     
     return 1;
 }
@@ -77,10 +77,10 @@ int make(){
 int main_uds(){
  
     TChain *chain= new TChain("h1");
-    chain->Add("trees/uds/uds.root");
+    chain->Add("../eef1/trees/uds/uds.root");
     yield as(chain);
-    cout << "trees/uds/uds.root is opened "  << endl;
-    as.Loop("uds.root");
+    cout << "../eef1/trees/uds/uds.root is opened "  << endl;
+    as.Loop("../eef1/histograms/uds.root");
     
     return 1;
 }
