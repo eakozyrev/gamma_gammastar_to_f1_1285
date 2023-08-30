@@ -773,8 +773,8 @@ void draw_cross_sect_diff(int mode = 0){
      dcr0[nrun] = dcr0[nrun]/1000./(den[nrun]-en[nrun]);
      cr1[nrun] = cr1[nrun]/1000./(den[nrun]-en[nrun]);
      dcr1[nrun] = dcr1[nrun]/1000./(den[nrun]-en[nrun]);
-     en[nrun] = en[nrun]/2. + den[nrun]/2.;
      den[nrun] = (den[nrun] - en[nrun])/2.;
+     en[nrun] = en[nrun] + den[nrun];
      total[nrun] = cr0[nrun] + cr1[nrun];
      dtotal[nrun] = sqrt(pow(dcr0[nrun],2.) + pow(dcr1[nrun],2.));
      if(stream.eof()==1)break;
@@ -1102,7 +1102,7 @@ double TFF_Asym_interp(double *e, double *par){
 }
 
 
-double F_L3(double *Q2, double *par){
+double F_L3_squared(double *Q2, double *par){
 
   double M = 1.281;
   double L = 1.04;
@@ -1115,7 +1115,7 @@ double F_L3(double *Q2, double *par){
 }
 
 
-double cross_section_dQ2_TT(double *Q2, double *par){
+double cross_section_dQ2_TT_(double *Q2, double *par){
 
   // PRL 59, 18 (1987)
   double alpha = 1/137.;
@@ -1126,7 +1126,7 @@ double cross_section_dQ2_TT(double *Q2, double *par){
   double s = 10.8*10.8; //par[0]*par[0];
   double dzeta = (M*M + Q2[0])/s;
   double res = alpha*alpha*12.*G/pow(M,3.)*(log(Qmax_me)*(log(1/dzeta)-3./2.) + pow(log(1/dzeta),2.) - 2.5*log(1/dzeta)-3.14*3.14/6.+19./8.);
-  res = hc*res*Q2[0]/pow(M,4.)*pow(F_L3(Q2,par),2.);
+  res = hc*res*Q2[0]/pow(M,4.)*F_L3_squared(Q2,par);
   
   return res;
 }
@@ -1151,10 +1151,38 @@ double cross_section_dQ2_TL(double *Q2, double *par){
   cout << "dzeta = " << dzeta << " ";
   double res = alpha*alpha*24.*G/pow(M,3.)*(log(Qmax_me)*(log(1/dzeta)-7./4.) + pow(log(1/dzeta),2.) - 3.*log(1/dzeta)-3.14*3.14/6.+23./8.);
   cout << "res = " << res << " ";
-  res = hc*res/M/M*pow(F_L3(Q2,par),2.);
+  res = hc*res/M/M*F_L3_squared(Q2,par);
   
   return res;
 }
+
+double cross_section_dQ2(double *Q2, double *par){
+
+  // PRD 35, 11 (1987)
+  double alpha_ = 1/137.;
+  double pi_ = TMath::Pi();
+  double hc = 3.88*pow(10.,8.); // pb/GeV^2  197 MeV*fm
+  double s = 10.8*10.8;
+  double M = 1.285;
+  double G = 3.5/1000/1000;
+  double me_ = 0.511/1000.;
+  double res = hc*pow(alpha_/2./pi_,2.)*log(s/4./me_/me_)*pi_/4.;
+  res*=96.*pi_/pow(M,5.)*G*F_L3_squared(Q2,par);
+
+  return res;
+}
+
+double cross_section_dQ2_TT(double *Q2, double *par){
+
+  double M = 1.285;
+  double s = 10.8*10.8;
+  double tau_ = (M*M+Q2[0])/s;
+  double res = cross_section_dQ2(Q2, par);
+  res*=4.*(1+tau_)*log(1/tau_)-(1-tau_)*(7+tau_);
+
+  return res;
+}
+  
 
 
 double  effic_Q2(double left, double right, int m, bool FF){
