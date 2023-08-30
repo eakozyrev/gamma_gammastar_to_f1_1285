@@ -1,0 +1,3 @@
+sudo apt install cernlib
+gfortran -o test test.f -lmathlib 
+#gfortran -o test test.f -lmathlib -fallow-argument-mismatch
