@@ -237,6 +237,10 @@ c
      & ' Fm=',D10.2,//,
      &  ' Cross sec. = (',D10.4,' +-',D8.2,') nb',/)
 c
+      open(1, file='cross.txt', status='old', action='write')
+      write(1, *) TSEC
+      close(1)
+c      
       end
 c---------------------------------------------------------------------
       SUBROUTINE GGRESPS(EB0)

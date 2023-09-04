@@ -32,25 +32,37 @@ c**********************************************************************
       implicit none
       Double Precision EB0,FMAX0,rmax0,rmin0,t2max0
       integer IR0,IMODE0,KVDM0,RAD0,i
+
+      integer :: numArgs
+      character(len=100) :: arg
+      real(kind=8) :: value
+      character num1char 
 c---------------------------------------------------------------------      
       EB0=10.58/2     !10.58/2.
 c      EB0=189./2    ! L3 at LEP
-c      IR0=6          !  f1 m=1
-      IR0=7          
+      IR0=6          !  f1 m=1
+C      IR0=7         !  f1 m=0 
       IMODE0=0       !  number of decay mode
-      KVDM0=1        !  KVDM factor
+      KVDM0=0        !  KVDM factor
 c      FMax0=0.2      ! for IR0  =7  for notag MC
 c      FMax0=1. ! for IR0  =6  for notag MC 
 c      FMax0=0.02      ! for IR0  =6  for t2max0=-1.5d0
-      FMax0=1.6      ! for IR0  =7  for t2max0=-1.5d0
+      FMax0=2.6      ! for IR0  =7  for t2max0=-1.5d0
 c      RAD0=0         ! for notag MC   
-      RAD0=1
+      RAD0=0
       rmax0=0.5
       rmin0=1.d-4
 c     t2max0=-0.0001
-      t2max0=-2.
-      FMax0=0.05
-      RAD0=1
+      t2max0=-6.
+
+
+ 
+      call get_command_argument(1, arg)
+      read(arg, *) t2max0
+
+
+      
+      
       call GGRESI(EB0,IR0,IMODE0,KVDM0,RAD0,FMAX0,
      &  rmax0,rmin0,t2max0)
 

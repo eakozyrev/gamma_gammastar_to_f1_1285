@@ -756,6 +756,11 @@ cout << "Here5" << endl;
 }
 
 void draw_cross_sect_diff(int mode = 0){
+
+
+  double ss[]={0.02,0.1,0.4,0.9,6.};
+  double cross_FF1_norad_m1[]={60.1, 54.5, 42.1, 29.7, 4.29};
+  //TFF_Asym
   
   double cross_section_dQ2_TL(double *Q2, double *par);
   double cross_section_dQ2_TT(double *Q2, double *par);
