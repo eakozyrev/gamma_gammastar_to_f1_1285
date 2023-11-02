@@ -39,8 +39,8 @@ TTree *tree_m0_gen, *tree_m1_gen;
 string SELECT = "1==1";
 double result[10];
 
-double cross_total_m0 = 33.8*2.;//  pb
-double cross_total_m1 = 17.4*2.;//  pb
+double cross_total_m0 = 22.*2.;//  pb
+double cross_total_m1 = 10.7*2.;//  pb
 double dcr2[6];
 
 void open(){
@@ -303,7 +303,7 @@ void draw_fraction(){
  double en[100000],den[100000],cr[100000],dcr[100000];
  double dcrl[1000],dcrh[1000];
    int nrun = 0;
-   ifstream stream("results/m0_froaction/m0_fraction_0.dat");
+   ifstream stream("../eef1/results/m0_froaction/m0_fraction_0.dat");
    while(stream.eof()==0){
 	stream >> en[nrun] >> den[nrun] >> cr[nrun] >> cr[nrun] >> dcr[nrun];
 	den[nrun] = ( den[nrun]  - en[nrun])/2.;
@@ -315,7 +315,7 @@ void draw_fraction(){
    vector<double> model_un[6];
 
    struct dirent *entry;
-   DIR *dir = opendir("results/m0_froaction/");
+   DIR *dir = opendir("../eef1/results/m0_froaction/");
    if (dir == NULL) {
      return;
    }
@@ -323,7 +323,7 @@ void draw_fraction(){
    while ((entry = readdir(dir)) != NULL) {
      string newfile = entry->d_name;
      if(newfile.find(".dat") > 1000)continue;
-     ifstream stream("results/m0_froaction/"+newfile);
+     ifstream stream("../eef1/results/m0_froaction/"+newfile);
      cout << newfile << endl;
      num = 0;
      while(stream.eof()==0){
@@ -899,19 +899,15 @@ void draw_cross_sect(int mode = 0){
    dtotalO[0] = sqrt(pow(dcr0[0]*factm0,2.)+pow(dcr0[1]*factm0,2.)+pow(dcr0[2]*factm0,2.)+pow(dcr1[0]*factm1,2.)+pow(dcr1[1]*factm1,2.)+pow(dcr1[2]*factm1,2.));
    
    TCanvas *s = new TCanvas();
-   TH1F *frd  = s->DrawFrame(-2.,0.001,22.,80.);
-   if(mode == 1)frd  = s->DrawFrame(1.,0.001,22.,1.);
+   TH1F *frd  = s->DrawFrame(-5.,0.001,22.,100.);
    frd->SetXTitle("Q^{2}, GeV^{2}");
    frd->SetYTitle("#Delta#sigma (pb)");
-
 
    double unc_cor_cr1[nrun];
    for(int i = 0; i < nrun; i++)unc_cor_cr1[i] = dcr2[i]*total[i];
    TGraphAsymmErrors *Crossdf  = new TGraphAsymmErrors(nrun,en,cr1,den,den,unc_cor_cr1,unc_cor_cr1);
    Crossdf->SetMarkerColor(4);
    Crossdf->SetMarkerStyle(23);
-   Crossdf->SetLineColor(4);
-   Crossdf->SetLineWidth(1.);
    Crossdf->SetTitle("corr uncer");
    Crossdf->SetMarkerColor(2);
    Crossdf->SetMarkerStyle(20);
@@ -920,15 +916,13 @@ void draw_cross_sect(int mode = 0){
    Crossdf->SetTitle("");
    Crossdf->SetFillColor(3);
    Crossdf->SetFillStyle(3001);
-   Crossdf->Draw("a2");
+   
 
    double unc_cor_cr0[nrun];
    for(int i = 0; i < nrun; i++)unc_cor_cr0[i] = dcr2[i]*cr0[i];
    TGraphAsymmErrors *Crossdf0  = new TGraphAsymmErrors(nrun,en,cr0,den,den,unc_cor_cr0,unc_cor_cr0);
    Crossdf0->SetMarkerColor(4);
    Crossdf0->SetMarkerStyle(23);
-   Crossdf0->SetLineColor(4);
-   Crossdf0->SetLineWidth(1.);
    Crossdf0->SetTitle("corr uncer");
    Crossdf0->SetMarkerColor(2);
    Crossdf0->SetMarkerStyle(20);
@@ -947,25 +941,25 @@ void draw_cross_sect(int mode = 0){
    CrossO->SetLineColor(1);
    CrossO->SetLineWidth(3.);
    CrossO->SetTitle("#sigma(0.9--6)");
-   if(mode == 0)CrossO->Draw("P");
+   //if(mode == 0)CrossO->Draw("P");
    
-   TGraphErrors *Crossr  = new TGraphErrors(nrun,en,total,den,dtotal);
-   Crossr->SetMarkerColor(1);
-   Crossr->SetMarkerStyle(21);
-   Crossr->SetMarkerSize(1.3);
-   Crossr->SetLineColor(1);
-   Crossr->SetLineWidth(3.);
-   Crossr->SetTitle("#sigma(TT) + #sigma(ST)");
-   Crossr->Draw("P");
+   TGraphErrors *Cross_sum  = new TGraphErrors(nrun,en,total,den,dtotal);
+   Cross_sum->SetMarkerColor(1);
+   Cross_sum->SetMarkerStyle(21);
+   Cross_sum->SetMarkerSize(1.3);
+   Cross_sum->SetLineColor(1);
+   Cross_sum->SetLineWidth(3.);
+   Cross_sum->SetTitle("#sigma(TT) + #sigma(TL)");
+   
 
    
-   TGraphErrors *Cross  = new TGraphErrors(nrun,en,cr0,den,dcr0);
-   Cross->SetMarkerColor(2);
-   Cross->SetMarkerStyle(26);
-   Cross->SetLineColor(2);
-   Cross->SetLineWidth(1.);
-   Cross->SetTitle("#sigma(TT)");
-   Cross->Draw("P");
+   TGraphErrors *Cross0  = new TGraphErrors(nrun,en,cr0,den,dcr0);
+   Cross0->SetMarkerColor(2);
+   Cross0->SetMarkerStyle(26);
+   Cross0->SetLineColor(2);
+   Cross0->SetLineWidth(1.);
+   Cross0->SetTitle("#sigma(TT)");
+  
 
    TGraphErrors *Cross1  = new TGraphErrors(nrun,en,cr1,den,dcr1);
    Cross1->SetMarkerColor(4);
@@ -973,7 +967,7 @@ void draw_cross_sect(int mode = 0){
    Cross1->SetLineColor(4);
    Cross1->SetLineWidth(1.);
    Cross1->SetTitle("#sigma(TL)");
-   Cross1->Draw("P");
+   
 
    double ener0[] = {0.02, 0.1, 0.4, 0.9};
    double ener1[] = {0.1, 0.4, 0.9, 6.0};
@@ -991,18 +985,25 @@ void draw_cross_sect(int mode = 0){
    }
 
    
-   TGraphErrors *Cross2  = new TGraphErrors(4,ener0,cross,ener1,dcross);
-   Cross2->SetMarkerColor(1);
-   Cross2->SetMarkerStyle(20);
-   Cross2->SetLineColor(1);
-   Cross2->SetLineWidth(2.);
-   Cross2->SetTitle("L3");
-   Cross2->SetFillColor(2);
-   Cross2->SetFillStyle(3001);
-   if(mode == 0)Cross2->Draw("2");
+   TGraphErrors *CrossL3  = new TGraphErrors(4,ener0,cross,ener1,dcross);
+   CrossL3->SetMarkerColor(1);
+   CrossL3->SetMarkerStyle(20);
+   CrossL3->SetLineColor(1);
+   CrossL3->SetLineWidth(2.);
+   CrossL3->SetTitle("L3");
+   CrossL3->SetFillColor(2);
+   CrossL3->SetFillStyle(3001);
 
-   if(mode == 0)Cross->Draw("P");
-   if(mode == 0)Crossr->Draw("P");
+   if(mode == 1){
+     CrossL3->Draw("2");
+     Cross_sum->Draw("P");
+   }
+   else{
+     Crossdf->Draw("a2");
+     Cross1->Draw("P");
+     Cross0->Draw("P");
+     Cross_sum->Draw("P");
+   }
 
    double crm1[10],crm0[10],dcrm1[10],enth[10],denrh[10],dcrm0[10];
    TF1 *fcr = new TF1("fcr",dcrs,0.01,30,2);
@@ -1030,8 +1031,6 @@ void draw_cross_sect(int mode = 0){
    Cross4->SetFillColor(1);
    Cross4->SetFillStyle(1001);
    //   if(mode == 0)Cross4->Draw("P");
-
-   
 
    s->BuildLegend();
    
@@ -1111,10 +1110,10 @@ double F_L3_squared(double *Q2, double *par){
 
   double M = 1.281;
   double L = 1.04;
-  double res = Q2[0]/M/M*(1.+0.5*Q2[0]/M/M)*2/pow(1+Q2[0]/L/L,4.);
-
+  //  double res = Q2[0]/M/M*(1.+0.5*Q2[0]/M/M)*2/pow(1+Q2[0]/L/L,4.);
+  double res = (1.+0.5*Q2[0]/M/M)/pow(1+Q2[0]/L/L,4.);
   
-  return res;
+  return sqrt(res);
   
 
 }
@@ -1145,10 +1144,10 @@ double cross_section_dQ2_TL(double *Q2, double *par){
 
   double hc = 3.88*pow(10.,8.); // pb/GeV^2  197 MeV*fm
 
-  double G = 3.5/1000/1000;
+  double G = 4.1/1000/1000;
   double M = 1.285;
   cout << " Hello1 " << endl;
-  double Qmax_me = 100/511./511.*pow(10.,12);
+  double Qmax_me = 1282.*1282./0.511/0.511;
   cout << " Hello1 " << endl;
   double s = 10.8*10.8; //par[0]*par[0];
   cout << " Hello2 " << endl;
@@ -1156,7 +1155,7 @@ double cross_section_dQ2_TL(double *Q2, double *par){
   cout << "dzeta = " << dzeta << " ";
   double res = alpha*alpha*24.*G/pow(M,3.)*(log(Qmax_me)*(log(1/dzeta)-7./4.) + pow(log(1/dzeta),2.) - 3.*log(1/dzeta)-3.14*3.14/6.+23./8.);
   cout << "res = " << res << " ";
-  res = hc*res/M/M*F_L3_squared(Q2,par);
+  res = hc*res/M/M;// *F_L3_squared(Q2,par);
   
   return res;
 }
@@ -1172,8 +1171,8 @@ double cross_section_dQ2(double *Q2, double *par){
   double G = 3.5/1000/1000;
   double me_ = 0.511/1000.;
   double res = hc*pow(alpha_/2./pi_,2.)*log(s/4./me_/me_)*pi_/4.;
-  res*=96.*pi_/pow(M,5.)*G*F_L3_squared(Q2,par);
 
+ 
   return res;
 }
 
@@ -1187,6 +1186,39 @@ double cross_section_dQ2_TT(double *Q2, double *par){
 
   return res;
 }
+
+
+
+double cross_section_Cahn(){
+
+  // PRD 35, 11 (1987)
+  double alpha_ = 1/137.;
+  double pi_ = TMath::Pi();
+  double hc = 3.88*pow(10.,8.); // pb/GeV^2  197 MeV*fm
+  double s = 10.8*10.8;
+  double M = 1.285;
+  double G = 4.1/1000/1000;
+  double me_ = 0.511/1000.;
+  double res = hc*pow(alpha_/2./pi_,2.)*log(s/4./me_/me_)*16*pi_*pi_/pow(M,5.)*3./2.*G;
+  
+  
+  double int_ = 0;
+  double Q2[] = {0.2};
+  double step = 0.02;
+  while(Q2[0] < 1.2){
+    
+    //double taup = (M*M+Q2[0])/s;
+    
+    int_+= cross_section_dQ2_TL(Q2,Q2)*step;  //(4.*(1+taup)*(log(1/taup)-7./4.) - (1.-taup)*(7.+taup)/4.)*step;
+    cout << Q2[0] << " " << int_ << endl; 
+    Q2[0] += step;
+    
+  }  
+  
+  return int_;
+
+}
+
   
 
 
@@ -1256,7 +1288,7 @@ void draw_ff(){
    gae->SetFillColor(1);
    gae->SetFillStyle(1001);
    gae->SetTitle("G(0,0)");
-   gae->Draw("2");
+   //gae->Draw("2");
    
    TGraphErrors *Crossr  = new TGraphErrors(nrun,en,cr0,den,dcr0);
    Crossr->SetMarkerColor(2);
@@ -1273,21 +1305,23 @@ void draw_ff(){
    Crossr1->SetLineWidth(2.);
    Crossr1->SetTitle("|G'|");
 
-   TF1 *u_fpr = new TF1("Asymp",TFF_Asym,1.,40,0);
-   u_fpr->SetLineColor(1);
-   //   u_fpr->Draw("same");
+   TF1 *u_fpr = new TF1("GM","1/(1+x/[0])",0.,40);
+   u_fpr->SetLineColor(4);
+   Crossr1->Fit(u_fpr);
+   u_fpr->SetTitle("1/(1+Q^{2}/#Lambda^{2})");
+   u_fpr->Draw("same");
 
 
-   double er[100],err[100],der[100],derr[100];
-   for(int i = 0; i < 100; i++){
+   double er[500],err[500],der[500],derr[500];
+   for(int i = 0; i < 500; i++){
 
-     er[i] = 0.5 + i/100.*30.;
+     er[i] = 0.05 + i/500.*30.;
      err[i] = TFF_Asym(&er[i],&er[i]);
-     der[i] = 0.1;
+     der[i] = 0.;
      derr[i] = TFF_Asym_err(&er[i],&er[i]);
 
    }  
-   TGraphErrors* ge = new TGraphErrors(100, er, err, der, derr);
+   TGraphErrors* ge = new TGraphErrors(500, er, err, der, derr);
    ge->SetFillColor(3);
    ge->SetFillStyle(3001);
    ge->Draw("3");
@@ -1295,8 +1329,48 @@ void draw_ff(){
    ge->SetTitle("Asymptotic");
    Crossr->Draw("P");
    Crossr1->Draw("P");
+
+   
 }
 
 
+
+double cross_m(double min_, double max_, int mode){
+
+  //F_L3_squared(double *Q2, double *par){
+
+  string  name_ = mode == 0 ? "testgg/cross_secs_m0.txt" : "testgg/cross_secs_m1.txt";
+  ifstream stream_(name_.c_str());
+
+  double en1 = 0.02;
+  double cr1,en2,cr2;
+
+  double res = 0;
+  stream_ >> en1 >> cr1;
+  double ss[] = {en1};
+  while(en1 < max_){
+    stream_ >> en2 >> cr2;
+    if(en1 >= min_){
+      ss[0] = en2/2. + en1/2.;
+      double ff = 1/(1+ss[0]/0.72/0.72); //TFF_Asym(ss,ss); //F_L3_squared(ss,ss); //
+      cout << "ff=" << ff << " ";
+      res+=(cr1-cr2)*ff*ff*5.4;
+    }
+    cr1=cr2;
+    en1=en2;
+  }
+  stream_.close();
+  return res*2.;
+
+}
+
+
+int main_(){
+
+  cout << cross_m(0.02,0.1, 0) << endl;
+
+  return 0.;
+
+}
 
 
