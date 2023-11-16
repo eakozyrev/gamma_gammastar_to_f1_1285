@@ -974,6 +974,7 @@ void draw_cross_sect(int mode = 0){
    double cross[] = {28.9, 57.7, 29.8, 28.2};
    double dcross[] = {8., 7.6, 4.7, 3.8};
    double ddcross[] = {2.7, 5.3, 3.8, 4.3};
+   double cr_model[10],en_model[10], dcr_model[10], den_model[10];
    for(int i = 0; i < 4; i++){
      double btv = (ener1[i] - ener0[i])/2.;
      ener0[i] = (ener1[i] + ener0[i])/2.;
@@ -982,6 +983,8 @@ void draw_cross_sect(int mode = 0){
      dcross[i] = dcross[i]/5.4;
      ddcross[i] = ddcross[i]/5.4;
      dcross[i] = sqrt(pow(dcross[i],2.) + pow(ddcross[i],2.));
+     en_model[i] = ener0[i];
+     den_model[i] = ener1[i];
    }
 
    
@@ -994,9 +997,28 @@ void draw_cross_sect(int mode = 0){
    CrossL3->SetFillColor(2);
    CrossL3->SetFillStyle(3001);
 
+   for(int i =0; i < 6; i++){
+     en_model[i+4] = en[i];
+     den_model[i+4] = den[i];
+   }
+
+   double cross_m(double,double,int);
+   for(int i=0; i < 10; i++){
+     cr_model[i] = 1000.*(cross_m(en_model[i]-den_model[i], en_model[i]+den_model[i],0) + cross_m(en_model[i]-den_model[i], en_model[i]+den_model[i],1));
+   }
+   TGraphErrors *Cross_model  = new TGraphErrors(10,en_model,cr_model,den_model,0);
+   Cross_model->SetMarkerColor(3);
+   Cross_model->SetMarkerStyle(20);
+   Cross_model->SetMarkerSize(0.);
+   Cross_model->SetLineColor(3);
+   Cross_model->SetLineWidth(4.);
+   Cross_model->SetTitle("MODEL");
+
+   
    if(mode == 1){
      CrossL3->Draw("2");
      Cross_sum->Draw("P");
+     Cross_model->Draw("P");
    }
    else{
      Crossdf->Draw("a2");
@@ -1305,7 +1327,7 @@ void draw_ff(){
    Crossr1->SetLineWidth(2.);
    Crossr1->SetTitle("|G'|");
 
-   TF1 *u_fpr = new TF1("GM","1/(1+x/[0])",0.,40);
+   TF1 *u_fpr = new TF1("GM","1/(1+x/[0]/[0])",0.,40);
    u_fpr->SetLineColor(4);
    Crossr1->Fit(u_fpr);
    u_fpr->SetTitle("1/(1+Q^{2}/#Lambda^{2})");
@@ -1352,9 +1374,9 @@ double cross_m(double min_, double max_, int mode){
     stream_ >> en2 >> cr2;
     if(en1 >= min_){
       ss[0] = en2/2. + en1/2.;
-      double ff = 1/(1+ss[0]/0.72/0.72); //TFF_Asym(ss,ss); //F_L3_squared(ss,ss); //
+      double ff = 1/(1+ss[0]/0.827/0.827); //TFF_Asym(ss,ss); //F_L3_squared(ss,ss); //
       cout << "ff=" << ff << " ";
-      res+=(cr1-cr2)*ff*ff*5.4;
+      res+=(cr1-cr2)*ff*ff; //*5.4;
     }
     cr1=cr2;
     en1=en2;
