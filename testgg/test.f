@@ -41,18 +41,20 @@ c---------------------------------------------------------------------
       EB0=10.58/2     !10.58/2.
 c      EB0=189./2    ! L3 at LEP
       IR0=6          !  f1 m=1
-C      IR0=7         !  f1 m=0 
-      IMODE0=0       !  number of decay mode
+c      IR0=7         !  f1 m=0 
+c      IMODE0=3       !  number of decay mode
       KVDM0=0        !  KVDM factor
 c      FMax0=0.2      ! for IR0  =7  for notag MC
 c      FMax0=1. ! for IR0  =6  for notag MC 
 c      FMax0=0.02      ! for IR0  =6  for t2max0=-1.5d0
-      FMax0=2.6      ! for IR0  =7  for t2max0=-1.5d0
+      FMax0=0.5      ! for IR0  =7  for t2max0=-1.5d0
 c      RAD0=0         ! for notag MC   
       RAD0=0
-      rmax0=0.5
-      rmin0=1.d-4
-c     t2max0=-0.0001
+      rmax0=10.5 
+c     rmax0=0.5 
+      rmin0=1.d-5
+c     rmin0=1.d-4
+c      t2max0=-0.0001
       t2max0=-6.
 
 

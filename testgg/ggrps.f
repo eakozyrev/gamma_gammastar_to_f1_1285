@@ -50,7 +50,7 @@ C#include "AfkQed/ggrps.inc"
       REAL*8 RMASS(7),RGGG(7),RWIDTH(7)
       data RMASS/
      &  0.1349766D0,0.54751D0,0.95778D0,2.9804D0,9.4,1.2819,1.2819/
-      data RGGG/0.007742D0,0.510D0,4.30D0,7.14D0,0.4,4.1,4.1/
+      data RGGG/0.007742D0,0.510D0,4.30D0,7.14D0,0.4,2.69,2.69/
       Data RWIDTH/0.0d0,0.0d0,0.0d0,34.3d-3,30.0d-3,22.7d-3,22.7d-3/
       integer i
 c      external afkrndm_ranmar
@@ -125,7 +125,7 @@ c      external afkrndm_ranmar
      * ' KVDM = ',I2,/,
      * ' RAD = ',I2,/,
      * ' max. Eph/Ebeam = ',F6.3,/,
-     * ' Q2max = ',F6.3,' GeV^2',/,  
+     * ' Q2max = ',F10.6,' GeV^2',/,  
      * ' FMAX = ', 1pE10.2,/,
      * ' Resonance decay mode = ',I3,':',/)
 

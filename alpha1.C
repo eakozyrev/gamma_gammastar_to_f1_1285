@@ -1089,11 +1089,11 @@ double TFF_Asym(double *e, double *par){
   double C3 = 1./6.;
   double C8 = 1./6./sqrt(3);
   //  double res = 3.*(C0*F0 + C3*F3 + C8*F8)*pow(1.285,3.);
-  double res = 3.*0.146*pow(1.285,3.); 
+  double res = 3.*par[0]*pow(1.285,3.); 
   res = res/pow(1.285,2.)*2.*(e[0] + 1.285*1.285)/2.;
   res = res/e[0]/e[0];
   double X = -pow(1.285,2.)/e[0];
-  res = res*2./X/X*(X/(1.-X) + log(1.-X));
+  res = res*2/X/X*(X/(1.-X) + log(1.-X));
   return res;
     
 }
@@ -1107,7 +1107,7 @@ double TFF_Asym_err(double *e, double *par){
   double C3 = 1./6.;
   double C8 = 1./6./sqrt(3);
   //  double res = 3.*(C0*F0 + C3*F3 + C8*F8)*pow(1.285,3.);
-  double res = 3.*0.014*pow(1.285,3.); 
+  double res = 3.*0.026*pow(1.285,3.); 
   res = res/pow(1.285,2.)*2.*(e[0] + 1.285*1.285)/2.;
   res = res/e[0]/e[0];
   double X = -pow(1.285,2.)/e[0];
@@ -1284,6 +1284,7 @@ void draw_ff(){
    double total[1000],dtotal[1000];
    ifstream stream("../eef1/results/cross.dat");
    double llll;
+   double ff0 = 0.39;
    while(stream.eof()==0){
      stream >> en[nrun] >> den[nrun] >> llll >> llll >> llll >> llll >> cr0[nrun] >> dcr0[nrun] >> cr1[nrun] >> dcr1[nrun];
      if(stream.eof()==1)break;
@@ -1293,6 +1294,10 @@ void draw_ff(){
      //dcr1[nrun] = sqrt(/*pow(dcr0[nrun]/cr0[nrun],2.) + */pow(dcr1[nrun]/cr1[nrun],2.));
      //cr1[nrun] = cr1[nrun];///cr0[nrun];
      //dcr1[nrun] =  dcr1[nrun]*cr1[nrun];
+     cr0[nrun]*=ff0;
+     dcr0[nrun]*=ff0;
+     cr1[nrun]*=ff0;
+     dcr1[nrun]*=ff0;
      nrun++;
    }
 
@@ -1317,7 +1322,7 @@ void draw_ff(){
    Crossr->SetMarkerStyle(20);
    Crossr->SetLineColor(2);
    Crossr->SetLineWidth(2.);
-   Crossr->SetTitle("|G'-F'|");
+   Crossr->SetTitle("|G-F*(M^{2}+Q^{2})/Q^{2}|");
    
    
    TGraphErrors *Crossr1  = new TGraphErrors(nrun,en,cr1,den,dcr1);
@@ -1325,15 +1330,25 @@ void draw_ff(){
    Crossr1->SetMarkerStyle(20);
    Crossr1->SetLineColor(4);
    Crossr1->SetLineWidth(2.);
-   Crossr1->SetTitle("|G'|");
+   Crossr1->SetTitle("|G|");
 
-   TF1 *u_fpr = new TF1("GM","1/(1+x/[0]/[0])",0.,40);
-   u_fpr->SetLineColor(4);
+   TF1 *u_fpr = new TF1("GM",TFF_Asym,0.,40,1);
+   u_fpr->SetParLimits(0,0,7);
+   u_fpr->SetLineColor(1);
+   u_fpr->SetParName(0,"F_{eff} (GeV)");
    Crossr1->Fit(u_fpr);
-   u_fpr->SetTitle("1/(1+Q^{2}/#Lambda^{2})");
+   u_fpr->SetTitle("F_{Hoferichter}");
    u_fpr->Draw("same");
 
+   TF1 *u_pole = new TF1("GM","0.39/(1+x/[0]/[0])",0.,40);
+   u_pole->SetParLimits(0,0,2);
+   u_pole->SetLineColor(3);
+   u_pole->SetParName(0,"#Lambda (GeV)");
+   Crossr1->Fit(u_pole);
+   u_pole->SetTitle("F_{pole}");
+   u_pole->Draw("same");
 
+   /*?
    double er[500],err[500],der[500],derr[500];
    for(int i = 0; i < 500; i++){
 
@@ -1349,6 +1364,7 @@ void draw_ff(){
    ge->Draw("3");
    ge->SetLineColor(3);
    ge->SetTitle("Asymptotic");
+*/
    Crossr->Draw("P");
    Crossr1->Draw("P");
 
