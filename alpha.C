@@ -16,7 +16,7 @@
 #include "TBenchmark.h"
 #include <iostream>
 #include <fstream>
-#include "RooChi2Var.h"
+//#include "RooChi2Var.h"
 #include <string>
 #include "TCut.h"
 #include "TFile.h"
@@ -45,7 +45,7 @@ using namespace std;
 #include "RooConstVar.h"
 #include "RooProdPdf.h"
 #include "RooAddPdf.h"
-#include "RooMinuit.h"
+//#include "RooMinuit.h"
 #include "RooFitResult.h"
 #include "RooKeysPdf.h"
 #include "RooFFTConvPdf.h"
@@ -53,6 +53,8 @@ using namespace std;
 #include "TCanvas.h"
 #include "TAxis.h"
 #include "TH1.h"
+
+//#include "/home/eakozyrev/Babar/fftw-3.3.10/api/fftw3.h"
 using namespace RooFit;
 
 
@@ -114,7 +116,7 @@ double fit2g1(string filee, string filemc, double qmin, double qmax){
    //   RooRealVar cosa0("cosa0","cosa0",-4,4); 
    RooRealVar Q2("Q2","Q2",0,400); 
    string selection = Form("mf1 > %g && mf1 < %g && Q2 > %g && Q2 < %g",startt,endd, qmin, qmax);
-   RooDataSet *data = new RooDataSet("data","data",RooArgSet(x,Q2),Import(*tree),Cut(selection.c_str()));
+   RooDataSet *Data = new RooDataSet("data","data",RooArgSet(x,Q2),Import(*tree),Cut(selection.c_str()));
 
 
   //*************************************************************************
@@ -151,7 +153,7 @@ double fit2g1(string filee, string filemc, double qmin, double qmax){
   RooAddPdf model("model","model",RooArgList(resol,P),frac) ;
   //model.plotOn(xframe1);
   // Construct unbinned likelihood of model w.r.t. data
-  RooAbsReal* nll = model.createNLL(*data) ;
+  RooAbsReal* nll = model.createNLL(*Data) ;
 
   // I n t e r a c t i v e   m i n i m i z a t i o n ,   e r r o r   a n a l y s i s
   // -------------------------------------------------------------------------------
@@ -164,7 +166,7 @@ double fit2g1(string filee, string filemc, double qmin, double qmax){
   //m.setVerbose(kFALSE) ;
 
   // Call MIGRAD to minimize the likelihood
-  RooFitResult* r = model.fitTo(*data,Save());
+  RooFitResult* r = model.fitTo(*Data,Save());
   //m.migrad();
   cout << "-log(L) at minimum = " << r->minNll() << endl ;
   cout << " (double)frac.getVal() = " <<  (double)frac.getVal() << endl;
@@ -177,12 +179,11 @@ double fit2g1(string filee, string filemc, double qmin, double qmax){
 
   paramm[4] = (double)c2.getVal();
   paramm[5] = c2.getError();
-  
   // Print values of all parameters, that reflect values (and error estimates)
   // that are back propagated from MINUIT
   //model.getParameters(x)->Print("s") ;
   RooPlot* xframe1 = x.frame(Title(Form("%g < Q^{2} < %g GeV^{2}",qmin,qmax)));
-  data->plotOn(xframe1);
+  Data->plotOn(xframe1);
   model.plotOn(xframe1); 
   model.plotOn(xframe1,Components(P),LineStyle(kDashed));
   
