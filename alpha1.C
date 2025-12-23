@@ -16,7 +16,7 @@
 #include "TBenchmark.h"
 #include <iostream>
 #include <fstream>
-#include "RooChi2Var.h"
+//#include "RooChi2Var.h"
 #include <string>
 #include "TCut.h"
 #include "TFile.h"
@@ -45,24 +45,26 @@ double dcr2[6];
 
 void open(){
 
-  newfile0 = TFile::Open("../eef1/histograms/data.root");//data.root");
-  tree0 = (TTree*)newfile0->Get("Tree");
+  if (!newfile0)
+  {
+    newfile0 = TFile::Open("../eef1/histograms/data.root");
+    tree0 = (TTree *)newfile0->Get("Tree");
 
-  newfile1 = TFile::Open("../eef1/histograms/mc_m0.root");
-  tree1 = (TTree*)newfile1->Get("Tree");
+    newfile1 = TFile::Open("../eef1/histograms/mc_m0.root");
+    tree1 = (TTree *)newfile1->Get("Tree");
 
-  newfile2 = TFile::Open("../eef1/histograms/mc_m1.root");
-  tree2 = (TTree*)newfile2->Get("Tree");
+    newfile2 = TFile::Open("../eef1/histograms/mc_m1.root");
+    tree2 = (TTree *)newfile2->Get("Tree");
 
-  newfile3 = TFile::Open("../eef1/histograms/mc_f0_eta_m0.root");
-  tree3 = (TTree*)newfile3->Get("Tree");
+    newfile3 = TFile::Open("../eef1/histograms/mc_f0_eta_m0.root");
+    tree3 = (TTree *)newfile3->Get("Tree");
 
-  newfile4 = TFile::Open("../eef1/histograms/mc_f0_eta_m1.root");
-  tree4 = (TTree*)newfile4->Get("Tree");
+    newfile4 = TFile::Open("../eef1/histograms/mc_f0_eta_m1.root");
+    tree4 = (TTree *)newfile4->Get("Tree");
 
-  tree_m0_gen = (TTree*)(TFile::Open("../eef1/histograms/mc_m0.root"))->Get("Treegen");
-  tree_m1_gen = (TTree*)(TFile::Open("../eef1/histograms/mc_m1.root"))->Get("Treegen");
-
+    tree_m0_gen = (TTree *)newfile1->Get("Treegen");
+    tree_m1_gen = (TTree *)newfile2->Get("Treegen");
+  }
 }
 
 
@@ -535,6 +537,7 @@ void compare(string filee, string filemc0, string filemc1, double factorm0, stri
   hm2ph->SetLineWidth(2.);
   hm2ph_mc->SetFillColor(4);
   hm2ph_mc->SetFillStyle(3002);
+  hm2ph_mc->SetNormFactor(notm);
   hm2ph_mc->Draw("same");
   hm2ph_b->SetNormFactor(0.5*hm2ph_b->GetEntries());hm2ph_b->Draw("same");
   hm2ph_b->SetFillStyle(3001);hm2ph_b->SetLineColor(13);hm2ph_b->SetFillColor(13);
@@ -679,17 +682,22 @@ void script_draw_cos(){
 
 
 void cross_section(){
+  open();
+
   ifstream stream("../eef1/results/nevents.dat");
   ifstream stream_ratio("../eef1/results/m0_froaction/m0_fraction_0.dat");
   ifstream stream_rad("../eef1/results/rad.dat");
   ofstream streamof("../eef1/results/cross.dat");
+  ofstream streamff_total("../eef1/results/FF_total.dat");
   double crossmc_m0, crossmc_m1;
 
+  ofstream stream_table_cr("../eef1/results/table_cr.dat");
   ofstream stream_table_cr0("../eef1/results/table_cr0.dat");
   ofstream stream_table_cr1("../eef1/results/table_cr1.dat");
   
-  double  effic_Q2(double, double, int, bool);
+  double  effic_Q2(double, double, int, bool, double&, double&);
   double factorm0 = 0.54;double dfactorm0;
+  double nselected0, ntotal0,nselected1, ntotal1;
   double btv;
   while(stream.eof()==0){
     double ena,enb,Nev,dNev;
@@ -719,16 +727,26 @@ void cross_section(){
     double cross_mc_m1 = partm1*cross_total_m1*1000.;
     double dcross_mc_m1 = dpartm1/partm1*cross_mc_m1;
     cout << "Here1" << endl;
-    double eff_m0 = effic_Q2(ena,enb,0,false);
+    double eff_m0 = effic_Q2(ena,enb,0,false,nselected0, ntotal0);
     cout << "Here2" << endl;
     double deff_m0 = sqrt(eff_m0*(1. - eff_m0)/(double)treem0gen->GetEntries(Form("Q2gen > %g && Q2gen < %g",ena,enb)));
     cout << "Here3" << endl;
-    double eff_m1 = effic_Q2(ena,enb,1,false);
+    double eff_m1 = effic_Q2(ena,enb,1,false,nselected1, ntotal1);
+
+
+    auto eff = (nselected0 + nselected1)/ (ntotal0 + ntotal1);
+    auto deff = sqrt(eff*(1.-eff)/(ntotal0 + ntotal1));
+
     cout << "Here4" << endl;
     double deff_m1 = sqrt(eff_m1*(1.-eff_m1)/(double)treem1gen->GetEntries(Form("Q2gen > %g && Q2gen < %g",ena,enb)));
 cout << "Here5" << endl;
-    double eff_m0_true = effic_Q2(ena,enb,0,true);
-    double eff_m1_true = effic_Q2(ena,enb,1,true);
+    double eff_m0_true = effic_Q2(ena,enb,0,true,nselected0, ntotal0);
+    double eff_m1_true = effic_Q2(ena,enb,1,true,nselected1, ntotal1);
+
+    auto eff_true = (nselected0 + nselected1)/ (ntotal0 + ntotal1);
+    std:: cout << nselected0  << " " <<  nselected1 << " " << ntotal0 << " " << ntotal1 << endl;
+    auto deff_true = sqrt(eff_true*(1.-eff_true)/(ntotal0 + ntotal1));
+
     cout << "Here6" << endl;
     double deff_m0_true = sqrt(eff_m0_true*(1. - eff_m0_true)/(double)treem0gen->GetEntries(Form("Q2gen > %g && Q2gen < %g",ena,enb)));
     double deff_m1_true = sqrt(eff_m1_true*(1. - eff_m1_true)/(double)treem1gen->GetEntries(Form("Q2gen > %g && Q2gen < %g",ena,enb)));
@@ -743,7 +761,11 @@ cout << "Here5" << endl;
     double dff_m0 = sqrt((cross_m0 +dcross_m0)/cross_mc_m0) - ff_m0;
     double ff_m1 = sqrt(cross_m1/cross_mc_m1);
     double dff_m1 = sqrt((cross_m1 + dcross_m1)/cross_mc_m1) - ff_m1;
+
+    auto ff_total = sqrt((cross_m0 + cross_m1)/(cross_mc_m0 + cross_mc_m1));
+    auto dff_total = sqrt(dcross_m0*dcross_m0 + dcross_m1*dcross_m1)/(cross_mc_m0 + cross_mc_m1)/2./ff_total;
     
+    streamff_total << ena << " " << enb << " " << ff_total << " " << dff_total << endl;
     cout << ena << " " << enb << " " << cross_m0 << " " << dcross_m0 << " "  << cross_m1 << " " << dcross_m1 << " " << ff_m0 << " " << dff_m0 << " "  << ff_m1 << "  " << dff_m1 << endl;
     streamof <<  ena << " " << enb << " " << cross_m0 << " " << dcross_m0 << " "  << cross_m1 << " " << dcross_m1 << " " << ff_m0 << " " << dff_m0 << " "  << ff_m1 << "  " << dff_m1 << endl;
 
@@ -751,6 +773,12 @@ cout << "Here5" << endl;
 
     stream_table_cr1 << ena << "$\\div$" << enb << " & " <<  Nm1 << " $\\pm$ " << dNm1 << " & " << ((int)(eff_m1*100000.))/1000. << " $\\pm$ " << ((int)(deff_m1*100000.))/1000.  << " & " <<  ((int)(eff_m1_true*100000.))/1000. << " $\\pm$ " << ((int)(deff_m1_true*100000.))/1000.  << " & " << (int)cross_mc_m1 << " $\\pm$ " << (int)dcross_mc_m1 <<  " & " << ((int)(cross_m1*100.))/100 << " $\\pm$ " << ((int)(dcross_m1*100.))/100 << " & " << ((int)(rad*100.))/100. << " \\\\" << endl;
     
+    stream_table_cr << ena << "$\\div$" << enb << " & " << Nev << " $\\pm$ " << dNev << " & " \
+      << ((int)(eff*100000.))/1000. << " $\\pm$ " << ((int)(deff*100000.))/1000.  << " & " 
+      << ((int)(eff_true*100000.))/1000. << " $\\pm$ " << ((int)(deff_true*100000.))/1000. \
+      << " & " << (int)(cross_mc_m0+cross_mc_m1) << " $\\pm$ " << (int)sqrt(dcross_mc_m0*dcross_mc_m0+dcross_mc_m1*dcross_mc_m1) \
+      <<  " & " << ((int)((cross_m1+cross_m0)*100.))/100 << " $\\pm$ " << ((int)(sqrt(dcross_m1*dcross_m1+dcross_m0*dcross_m0)*100.))/100 \
+      << " & " << ((int)(rad*100.))/100. << " \\\\" << endl;
   }
   
 }
@@ -949,7 +977,8 @@ void draw_cross_sect(int mode = 0){
    Cross_sum->SetMarkerSize(1.3);
    Cross_sum->SetLineColor(1);
    Cross_sum->SetLineWidth(3.);
-   Cross_sum->SetTitle("#sigma(TT) + #sigma(TL)");
+   //Cross_sum->SetTitle("#sigma(TT) + #sigma(TL)");
+   Cross_sum->SetTitle("#sigma (this work)");
    
 
    
@@ -989,9 +1018,9 @@ void draw_cross_sect(int mode = 0){
 
    
    TGraphErrors *CrossL3  = new TGraphErrors(4,ener0,cross,ener1,dcross);
-   CrossL3->SetMarkerColor(1);
+   CrossL3->SetMarkerColor(2);
    CrossL3->SetMarkerStyle(20);
-   CrossL3->SetLineColor(1);
+   CrossL3->SetLineColor(2);
    CrossL3->SetLineWidth(2.);
    CrossL3->SetTitle("L3");
    CrossL3->SetFillColor(2);
@@ -1012,7 +1041,7 @@ void draw_cross_sect(int mode = 0){
    Cross_model->SetMarkerSize(0.);
    Cross_model->SetLineColor(3);
    Cross_model->SetLineWidth(4.);
-   Cross_model->SetTitle("MODEL");
+   Cross_model->SetTitle("MODEL (this work)");
 
    
    if(mode == 1){
@@ -1244,10 +1273,15 @@ double cross_section_Cahn(){
   
 
 
-double  effic_Q2(double left, double right, int m, bool FF){
-
+double  effic_Q2(double left, double right, int m, bool FF, double &nselected, double &ntotal){
+  nselected = 0;
+  ntotal = 0;
   TTree *tree_effic;
   TTree *tree_effic_gen;
+
+  TF1 *u_pole = new TF1("GM","0.39/(1+x/[0]/[0])",0.,40);
+  u_pole->SetParameter(0, 0.818);
+
   if(m==0){
     tree_effic = tree1;
     tree_effic_gen = tree_m0_gen;
@@ -1260,17 +1294,22 @@ double  effic_Q2(double left, double right, int m, bool FF){
   
   double res = 0;
   double res0 = 0;
-  int Nsteps=10;
+  int Nsteps=20;
   double step = (right-left)/(double)Nsteps;
-  double factor;
+  double factor = 1.;
   for(int i = 0; i < Nsteps; i++){
     double q2 = left + step*i + step/2.;
+    // m2pigen < 0.55 && 
     double Neff = tree_effic->GetEntries(Form("mf1 > 1.17 && mf1 < 1.4 && Q2 > %g && Q2 < %g",q2-step/2.,q2+step/2.));
-    factor = 1;
-    if(FF)factor = pow(TFF_Asym_interp(&q2, &q2),2.);
+    if (FF)
+    {
+      factor = pow(u_pole->Eval(q2), 2.); // pow(TFF_Asym_interp(&q2, &q2),2.);
+    }
     res += factor*Neff;
     res0 += factor*(double)tree_effic_gen->GetEntries(Form("Q2gen > %g && Q2gen < %g",q2-step/2.,q2+step/2.));
   }
+  nselected = res;
+  ntotal = res0;
   return res/res0;
   
 }
@@ -1279,14 +1318,16 @@ double  effic_Q2(double left, double right, int m, bool FF){
 
 void draw_ff(){
 
-  double en[100000],den[100000],cr0[100000],dcr0[100000],cr1[100000],dcr1[100000];
+  double en[100000],den[100000],cr0[100000],dcr0[100000],cr1[100000],dcr1[100000], fftotal[10000], dfftotal[10000];
    int nrun = 0;
    double total[1000],dtotal[1000];
    ifstream stream("../eef1/results/cross.dat");
+   ifstream streamff_total("../eef1/results/FF_total.dat");
    double llll;
    double ff0 = 0.39;
    while(stream.eof()==0){
      stream >> en[nrun] >> den[nrun] >> llll >> llll >> llll >> llll >> cr0[nrun] >> dcr0[nrun] >> cr1[nrun] >> dcr1[nrun];
+     streamff_total >> en[nrun] >> den[nrun] >> fftotal[nrun] >> dfftotal[nrun];
      if(stream.eof()==1)break;
      double btv = (den[nrun] - en[nrun])/2.;
      en[nrun] = en[nrun]/2. + den[nrun]/2.;
@@ -1298,6 +1339,8 @@ void draw_ff(){
      dcr0[nrun]*=ff0;
      cr1[nrun]*=ff0;
      dcr1[nrun]*=ff0;
+     fftotal[nrun]*=ff0;
+     dfftotal[nrun]*=ff0;
      nrun++;
    }
 
@@ -1323,6 +1366,14 @@ void draw_ff(){
    Crossr->SetLineColor(2);
    Crossr->SetLineWidth(2.);
    Crossr->SetTitle("|G-F*(M^{2}+Q^{2})/Q^{2}|");
+
+
+   TGraphErrors *Crossrtottal  = new TGraphErrors(nrun,en,fftotal,den,dfftotal);
+   Crossrtottal->SetMarkerColor(1);
+   Crossrtottal->SetMarkerStyle(20);
+   Crossrtottal->SetLineColor(1);
+   Crossrtottal->SetLineWidth(2.);
+   Crossrtottal->SetTitle("|FF|");
    
    
    TGraphErrors *Crossr1  = new TGraphErrors(nrun,en,cr1,den,dcr1);
@@ -1336,7 +1387,7 @@ void draw_ff(){
    u_fpr->SetParLimits(0,0,7);
    u_fpr->SetLineColor(1);
    u_fpr->SetParName(0,"F_{eff} (GeV)");
-   Crossr1->Fit(u_fpr);
+   Crossrtottal->Fit(u_fpr);
    u_fpr->SetTitle("F_{Hoferichter}");
    u_fpr->Draw("same");
 
@@ -1344,9 +1395,9 @@ void draw_ff(){
    u_pole->SetParLimits(0,0,2);
    u_pole->SetLineColor(3);
    u_pole->SetParName(0,"#Lambda (GeV)");
-   Crossr1->Fit(u_pole);
    u_pole->SetTitle("F_{pole}");
-   u_pole->Draw("same");
+   Crossrtottal->Fit(u_pole);
+   //u_pole->Draw("same");
 
    /*?
    double er[500],err[500],der[500],derr[500];
@@ -1365,8 +1416,9 @@ void draw_ff(){
    ge->SetLineColor(3);
    ge->SetTitle("Asymptotic");
 */
-   Crossr->Draw("P");
-   Crossr1->Draw("P");
+   //Crossr->Draw("P");
+   //Crossr1->Draw("P");
+   Crossrtottal->Draw("P");
 
    
 }
