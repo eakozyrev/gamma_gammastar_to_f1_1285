@@ -107,6 +107,7 @@ double fit2g1(string filee, string filemc, double qmin, double qmax){
   double startt = 1.17;//startt, endd
   double endd = 1.4;
   RooRealVar x("mf1","m_{#eta2#pi}, MeV/c^{2}",startt, endd);
+  RooRealVar m2pi("m2pi","m2pi, MeV/c^{2}",0,1);
   RooRealVar frac("frac","frac",0.9,0.040,1.0);
 
   TFile *newfile = TFile::Open((""+filee).c_str());
@@ -115,8 +116,9 @@ double fit2g1(string filee, string filemc, double qmin, double qmax){
    x.setBins(50); 
    //   RooRealVar cosa0("cosa0","cosa0",-4,4); 
    RooRealVar Q2("Q2","Q2",0,400); 
-   string selection = Form("mf1 > %g && mf1 < %g && Q2 > %g && Q2 < %g",startt,endd, qmin, qmax);
-   RooDataSet *Data = new RooDataSet("data","data",RooArgSet(x,Q2),Import(*tree),Cut(selection.c_str()));
+   //m2pi < 0.55 && 
+   string selection = Form("m2pi < 0.55 && mf1 > %g && mf1 < %g && Q2 > %g && Q2 < %g",startt,endd, qmin, qmax);
+   RooDataSet *Data = new RooDataSet("data","data",RooArgSet(x,Q2,m2pi),Import(*tree),Cut(selection.c_str()));
 
 
   //*************************************************************************
@@ -124,9 +126,9 @@ double fit2g1(string filee, string filemc, double qmin, double qmax){
 
   TFile *newfilemc = TFile::Open((""+filemc).c_str());
   TTree* treemc = (TTree*)newfilemc->Get("Tree");
-
-  string selectionmc = Form("mf1 > %g && mf1 < %g && Q2 > %g-5 && Q2 < %g+2",startt,endd, qmin, qmax); 
-  RooDataSet datamc("datamc","datamc",RooArgSet(x,Q2),Import(*treemc),Cut(selectionmc.c_str()));
+  //m2pi < 0.55 && 
+  string selectionmc = Form("m2pi < 0.55 && mf1 > %g && mf1 < %g && Q2 > %g-5 && Q2 < %g+2",startt,endd, qmin, qmax); 
+  RooDataSet datamc("datamc","datamc",RooArgSet(x,Q2,m2pi),Import(*treemc),Cut(selectionmc.c_str()));
   RooKeysPdf kest1("kest1","kest1",x,datamc,RooKeysPdf::MirrorBoth) ;
   RooRealVar mg("mg","mg",0.);//,-3,3); 
   RooRealVar sg("sg","sg",0.0003);//,0.0000001,0.1); 
