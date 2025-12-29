@@ -31,6 +31,9 @@
 #include <sys/types.h>
 #include "TGraphAsymmErrors.h"
 
+#include <sstream>
+#include <vector>
+
 using namespace std;
 TFile *newfile0, *newfile1, *newfile2, *newfile3, *newfile4;
 TTree *tree0, *tree1, *tree2, *tree3, *tree4, *tree;
@@ -1315,7 +1318,6 @@ double  effic_Q2(double left, double right, int m, bool FF, double &nselected, d
 }
 
 
-
 void draw_ff(){
 
   double en[100000],den[100000],cr0[100000],dcr0[100000],cr1[100000],dcr1[100000], fftotal[10000], dfftotal[10000];
@@ -1463,4 +1465,91 @@ int main_(){
 
 }
 
+std::vector<std::pair<double, double>> read_cross(std::string filename) {
+    std::ifstream file(filename);
 
+    // Проверяем, удалось ли открыть файл
+    if (!file.is_open()) {
+        std::cerr << "Ошибка: не удалось открыть файл " << filename << std::endl;
+        return {};
+    }
+
+    std::string line;
+    int line_number = 0;
+    double sum = 0.0;
+
+    std::vector<std::pair<double, double>> res;
+    // Читаем файл построчно
+    while (std::getline(file, line)) {
+        line_number++;
+
+        // Пропускаем пустые строки
+        if (line.empty()) {
+            continue;
+        }
+
+        std::istringstream iss(line);
+        std::vector<double> values;
+        double value; 
+
+        // Извлекаем все числа из строки
+        while (iss >> value) {
+            values.push_back(value);
+        }
+
+        // Проверяем, что в строке достаточно столбцов (минимум 5)
+        if (values.size() < 5) {
+            std::cerr << "Ошибка: в строке " << line_number 
+                      << " недостаточно столбцов (ожидается минимум 5)" << std::endl;
+            continue;
+        }
+
+        // Если это первая строка, берём 3‑й и 5‑й столбцы (индексы 2 и 4)
+        double col3 = values[2];  // 3‑й столбец (индекс 2)
+        double col5 = values[4];  // 5‑й столбец (индекс 4)
+        sum = col3 + col5;
+
+
+        std::pair<double, double> el = {sum, sqrt(values[3]*values[3]+values[5]*values[5])};
+        res.push_back(el);
+
+        std::cout << "Значение из 3‑го столбца: " << col3 << std::endl;
+        std::cout << "Значение из 5‑го столбца: " << col5 << std::endl;
+        std::cout << "Сумма: " << sum << std::endl;
+    }
+
+    file.close();
+    return res;
+}
+
+int compare_crosses()
+{
+  auto res1 = read_cross("../eef1/results/cross_l055.dat");
+  auto res2 = read_cross("../eef1/results/cross_g055.dat");
+
+  int n = res1.size();
+  double en[] = {3., 4.5, 5.5, 6.5, 8.5, 15};
+
+  double vec[6], dvec[6];
+  for (int i = 0; i < n; i++)
+  {
+    vec[i] = (res2[i].first - res1[i].first)/(res2[i].first + res1[i].first);
+    dvec[i] = sqrt(res2[i].second * res2[i].second + res1[i].second * res1[i].second)/(res2[i].first + res1[i].first);
+  }
+
+  TCanvas *s = new TCanvas();
+  TH1F *frd = s->DrawFrame(-5., -1, 22., 1.);
+  frd->SetXTitle("Q^{2}, GeV^{2}");
+  frd->SetYTitle("(#sigma_{<} - #sigma_{>})/(#sigma_{<} + #sigma_{>})");
+
+  TGraphErrors *Crossr1 = new TGraphErrors(6, en, vec, 0, dvec);
+  Crossr1->SetMarkerColor(4);
+  Crossr1->SetMarkerStyle(20);
+  Crossr1->SetLineColor(4);
+  Crossr1->SetLineWidth(2.);
+  Crossr1->SetTitle("|G|");
+  Crossr1->Fit("pol0");
+  Crossr1->Draw("P");
+
+  return 1;
+}
