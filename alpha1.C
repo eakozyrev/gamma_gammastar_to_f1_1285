@@ -482,24 +482,35 @@ void compare_cos(string filee, string filemc0, string filemc1, double factorm1, 
 
 
 
-void compare(string filee, string filemc0, string filemc1, double factorm0, string variable,string cutt = "1==1"){
+void compare(string filee, string filemc0, string filemc1, double factorm0, string variable,string cutt = "1==1", string xtitle = ""){
 
   TCanvas *s = new TCanvas();
   TCut cut = (cutt + " && ifsig==1").c_str();
   TFile *newfile = TFile::Open((filee).c_str());
-  TTree* tree = (TTree*)newfile->Get("Tree");
-  TH1D *htest = new TH1D("htest","htest",1000000,-10000,10000);
-  tree->Draw((variable + " >> htest").c_str(),cut);
+  TTree *tree = (TTree *)newfile->Get("Tree");
+  TH1D *htest = new TH1D("htest", "htest", 1000000, -10000, 10000);
+  tree->Draw((variable + " >> htest").c_str(), cut);
   double start = -10000;
   double end = 100000;
-  for(int i = 1; i <= 1000000; i++){
-	  if(htest->GetBinContent(i) > 0)start = htest->GetBinCenter(i);
+  for (int i = 1; i <= 1000000; i++)
+  {
+    if (htest->GetBinContent(i) > 0)
+    {
+      start = htest->GetBinCenter(i);
+      break;
+    }
   }
-  for(int i = 1000000; i > 0; i--){
-	  if(htest->GetBinContent(i) > 0)end = htest->GetBinCenter(i);
+  for (int i = 1000000; i > 0; i--)
+  {
+    if (htest->GetBinContent(i) > 0)
+    {
+      end = htest->GetBinCenter(i);
+      break;
+    }
   }
-  start = 0.6;
-  end = 1.3;
+  //start = 0.6;
+  //end = 1.3;
+  std::cout << "start = " << start << " " << "    end = " << end << std::endl;
   TH1D *h1;
   TH1D *hm2ph = new TH1D("hm2ph","hm2ph",40,start,end);
   tree->Draw((variable + Form(" >> h1(40,%g,%g)",start,end)).c_str(),cut);
@@ -528,19 +539,25 @@ void compare(string filee, string filemc0, string filemc1, double factorm0, stri
   h1 = (TH1D*)gPad->GetPrimitive("h1");
   hm2ph_mc1->Add(h1);
 
+  
+  //hm2ph_mc1->SetNormFactor((double)notm*(1.-factorm0));
+  //hm2ph_mc0->Scale((double)notm*factorm0/hm2ph_mc0->GetEntries());
+  //hm2ph_mc1->Scale((double)notm*(1.-factorm0)/hm2ph_mc1->GetEntries());
+
+  hm2ph_mc->Add(hm2ph_b,0.5);
+  hm2ph_mc->Add(hm2ph_mc0,(double)notm*factorm0/hm2ph_mc0->GetEntries());
+  hm2ph_mc->Add(hm2ph_mc1,(double)notm*(1.-factorm0)/hm2ph_mc1->GetEntries());
+  
+
   hm2ph_mc0->SetNormFactor((double)notm*factorm0);
   hm2ph_mc1->SetNormFactor((double)notm*(1.-factorm0));
 
-  hm2ph_mc->Add(hm2ph_b,0.5);
-  hm2ph_mc->Add(hm2ph_mc0,1);
-  hm2ph_mc->Add(hm2ph_mc1,1);
-  
   hm2ph->Draw("e");
   hm2ph->SetLineColor(1);
   hm2ph->SetLineWidth(2.);
   hm2ph_mc->SetFillColor(4);
   hm2ph_mc->SetFillStyle(3002);
-  hm2ph_mc->SetNormFactor(notm);
+  //hm2ph_mc->SetNormFactor(notm);
   hm2ph_mc->Draw("same");
   hm2ph_b->SetNormFactor(0.5*hm2ph_b->GetEntries());hm2ph_b->Draw("same");
   hm2ph_b->SetFillStyle(3001);hm2ph_b->SetLineColor(13);hm2ph_b->SetFillColor(13);
@@ -550,8 +567,15 @@ void compare(string filee, string filemc0, string filemc1, double factorm0, stri
   hm2ph->Draw("esame");
 
   //hm2ph->SetAxisRange(0,50,"Y");
-  hm2ph->SetXTitle(variable.c_str());
-
+  if (!xtitle.empty())
+  {
+    hm2ph->SetXTitle(xtitle.c_str());
+  }
+  else
+  {
+    hm2ph->SetXTitle(variable.c_str());
+  }
+  hm2ph->SetYTitle("yields");
   s->SaveAs(("plots/"+variable + cutt+".png").c_str());
   //s->Close();
   //newfile->Close();
